@@ -1,5 +1,5 @@
 /**
- * v.0.2
+ * v.0.2.1
  *
  * with jQuery
  * support
@@ -7,16 +7,16 @@
  * ---
  *
  *
- *
  */
 var ajaxObjs = [];
-var ajaxList = ['a11', 'a26'];
+var ajaxList = ['a11', 'a26', 'b1', 'b2', 'b3'];
 
 var ajaxSetting = {
 	domAttr: {
 		button: 'ajaxbutton',
 		rs: 'ajaxrs',
-		rspart: 'part'
+		rspart: 'part',
+		ajaxData: 'ajaxData'
 	},
 
 	defValues: {
@@ -28,15 +28,23 @@ function oConstruct(button, rsDom, name) {
 	var url = ajaxSetting.defValues.url,
 		data, obj;
 
-	//todo: сбор данных
-	data = {name:name};
+	data = button.attr(ajaxSetting.domAttr.ajaxData);
+	if(data === undefined) {
+		data = {};
+	} else {
+		try {
+			data = JSON.parse(data);
+		} catch (e) {
+			data = {};
+			console.error("Error: data in "+name+" "+e);
+		}
+	}
 
 	this.url = url;
 	this.rsDom = rsDom;
 	this.name = name;
 	this.button = button;
 	this.data = data;
-
 	obj = this;
 
 		this.button.on('click', function () {
@@ -82,7 +90,7 @@ function ajaxAction(o) {
 			console.log(xhr);
 		}
 	});
-};
+}
 
 function init() {
 	var button, rsDom, name;
