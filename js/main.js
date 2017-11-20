@@ -1,22 +1,24 @@
 /**
- * v.0.2.1
+ * v.0.3
  *
  * with jQuery
  * support
  * --- several blocks for one result
- * ---
+ * --- append / prepend
  *
  *
  */
 var ajaxObjs = [];
 var ajaxList = ['a11', 'a26', 'b1', 'b2', 'b3'];
-
+// todo: [idea] отдельный опциональный файл с сеттингами
+// todo: добавить поддежку классов
 var ajaxSetting = {
 	domAttr: {
 		button: 'ajaxbutton',
 		rs: 'ajaxrs',
 		rspart: 'part',
-		ajaxData: 'ajaxData'
+		ajaxData: 'ajaxData',
+		rsInsertType: 'ajaxrst'
 	},
 
 	defValues: {
@@ -36,7 +38,7 @@ function oConstruct(button, rsDom, name) {
 			data = JSON.parse(data);
 		} catch (e) {
 			data = {};
-			console.error("Error: data in "+name+" "+e);
+			console.error("Error: data in "+name+"|| "+e);
 		}
 	}
 
@@ -54,8 +56,6 @@ function oConstruct(button, rsDom, name) {
 }
 
 function ajaxAction(o) {
-	console.log(o);
-	var k, rsDomPart;
 	$.ajax({
 		type: 'POST',
 		url: o.url,
@@ -63,26 +63,9 @@ function ajaxAction(o) {
 		success: function(result) {
 			// todo: добавить возможность апенда, препенда и т.д.
 			if(result.res == 1){
-				if(typeof(result.html) === "string") {
-					if(o.rsDom.length > 1) {
-						o.rsDom.html(result.html);
-					} else {
-						console.error("Error: No result dom");
-						console.log(result.html);
-					}
-
-				} else if(typeof(result.html) === "object") {
-					for(k in result.html) {
-						rsDomPart = $('['+ajaxSetting.domAttr.rs+'="'+o.name+'"]['+ajaxSetting.domAttr.rspart+'="'+k+'"]');
-						if(rsDomPart) {
-							rsDomPart.html(result.html[k]);
-						}
-					}
-					console.log("Oh, my God! It's object!!");
-				} else {
-					console.error("Error: wrong response type");
-				}
-
+				prepareResult(o, result)
+			} else {
+				// todo: вывод ошибок
 			}
 
 		},
@@ -90,6 +73,50 @@ function ajaxAction(o) {
 			console.log(xhr);
 		}
 	});
+}
+
+
+function prepareResult(o, r) {
+	var k, rsDomPart,
+		rsInsertType;
+	console.log(rsInsertType);
+	if(typeof(r.html) === "string") {
+		rsInsertType = o.rsDom.attr(ajaxSetting.domAttr.rsInsertType);
+		if(o.rsDom.length > 0) {
+			insertResult(o.rsDom, r.html, rsInsertType);
+		} else {
+			console.error("Error: No result dom");
+			console.log(r.html);
+		}
+
+	} else if(typeof(r.html) === "object") {
+		for(k in r.html) {
+			rsDomPart = $('['+ajaxSetting.domAttr.rs+'="'+o.name+'"]['+ajaxSetting.domAttr.rspart+'="'+k+'"]');
+			if(rsDomPart) {
+				rsInsertType = rsDomPart.attr(ajaxSetting.domAttr.rsInsertType);
+				// rsDomPart.html(r.html[k]);
+				insertResult(rsDomPart, r.html[k], rsInsertType);
+			}
+		}
+		console.log("Oh, my God! It's object!!");
+	} else {
+		console.error("Error: wrong response type");
+	}
+}
+
+
+function insertResult(dom, html, rsInsertType) {
+	switch(rsInsertType) {
+		case 'append':
+			dom.append(html);
+			break;
+		case 'prepend':
+			dom.prepend(html);
+			break;
+		default:
+			dom.html(html);
+			break;
+	}
 }
 
 function init() {
@@ -116,5 +143,7 @@ function init() {
 		}
 	}
 }
-
-init();
+//todo: добавить сбор данных ajaxList
+$(document).ready(function() {
+	init();
+});
