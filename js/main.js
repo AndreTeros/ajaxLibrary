@@ -1,5 +1,5 @@
 /**
- * v.0.3
+ * v.0.3.5
  *
  * with jQuery
  * support
@@ -9,10 +9,13 @@
  *
  */
 var ajaxObjs = [];
-var ajaxList = ['a11', 'a26', 'b1', 'b2', 'b3'];
+// var ajaxList = ['a11', 'a26', 'b1', 'b2', 'b3'];
+var ajaxList = [];
 // todo: [idea] отдельный опциональный файл с сеттингами
 // todo: добавить поддежку классов
 var ajaxSetting = {
+	searchAttr: 'ajaxbutton',
+
 	domAttr: {
 		button: 'ajaxbutton',
 		rs: 'ajaxrs',
@@ -67,7 +70,6 @@ function ajaxAction(o) {
 			} else {
 				// todo: вывод ошибок
 			}
-
 		},
 		error: function(xhr){
 			console.log(xhr);
@@ -79,7 +81,6 @@ function ajaxAction(o) {
 function prepareResult(o, r) {
 	var k, rsDomPart,
 		rsInsertType;
-	console.log(rsInsertType);
 	if(typeof(r.html) === "string") {
 		rsInsertType = o.rsDom.attr(ajaxSetting.domAttr.rsInsertType);
 		if(o.rsDom.length > 0) {
@@ -98,12 +99,10 @@ function prepareResult(o, r) {
 				insertResult(rsDomPart, r.html[k], rsInsertType);
 			}
 		}
-		console.log("Oh, my God! It's object!!");
 	} else {
 		console.error("Error: wrong response type");
 	}
 }
-
 
 function insertResult(dom, html, rsInsertType) {
 	switch(rsInsertType) {
@@ -121,7 +120,7 @@ function insertResult(dom, html, rsInsertType) {
 
 function init() {
 	var button, rsDom, name;
-
+	ajaxListCollect();
 	if(!!ajaxList) {
 		for(var i=0; i < ajaxList.length; i++) {
 
@@ -143,7 +142,21 @@ function init() {
 		}
 	}
 }
-//todo: добавить сбор данных ajaxList
+
+function ajaxListCollect() {
+	var searchAttrValue;
+	$('['+ajaxSetting.searchAttr+']').each(function() {
+		console.log($(this).attr(ajaxSetting.searchAttr));
+		searchAttrValue = $(this).attr(ajaxSetting.searchAttr);
+		if(!!searchAttrValue && ajaxList.indexOf(searchAttrValue) === -1) {
+			ajaxList.push(searchAttrValue);
+		}
+	});
+	console.log(ajaxList);
+
+	// ajaxList
+}
+
 $(document).ready(function() {
 	init();
 });
